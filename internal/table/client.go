@@ -338,15 +338,21 @@ func (c *Client) BulkUpsert(
 	return nil
 }
 
-func (c *Client) ReadRows(ctx context.Context, path string, keys value.Value,
+func readRows(
+	ctx context.Context,
+	client Ydb_Table_V1.TableServiceClient,
+	sessionId string,
+	ignoreTruncated bool,
+	path string,
+	keys value.Value,
 	opts ...options.ReadRowsOption,
 ) (_ result.Result, err error) {
-
 	var (
 		a       = allocator.New()
 		request = Ydb_Table.ReadRowsRequest{
-			Path: path,
-			Keys: value.ToYDB(keys, a),
+			SessionId: sessionId,
+			Path:      path,
+			Keys:      value.ToYDB(keys, a),
 		}
 		response *Ydb_Table.ReadRowsResponse
 	)
@@ -360,7 +366,6 @@ func (c *Client) ReadRows(ctx context.Context, path string, keys value.Value,
 		}
 	}
 
-	client := Ydb_Table_V1.NewTableServiceClient(c.cc)
 	response, err = client.ReadRows(ctx, &request)
 	if err != nil {
 		return nil, xerrors.WithStackTrace(err)
@@ -375,9 +380,17 @@ func (c *Client) ReadRows(ctx context.Context, path string, keys value.Value,
 	return scanner.NewUnary(
 		[]*Ydb.ResultSet{response.GetResultSet()},
 		nil,
-		scanner.WithIgnoreTruncated(false),
+		scanner.WithIgnoreTruncated(ignoreTruncated),
 	), nil
+}
 
+func (c *Client) ReadRows(
+	ctx context.Context,
+	path string,
+	keys value.Value,
+	opts ...options.ReadRowsOption,
+) (_ result.Result, err error) {
+	return readRows(ctx, Ydb_Table_V1.NewTableServiceClient(c.cc), "", false, path, keys, opts...)
 }
 
 func executeTxOperation(ctx context.Context, c *Client, op table.TxOperation, tx table.Transaction) (err error) {
