@@ -77,6 +77,7 @@ type Client interface {
 	// be upserted and some might not.
 	BulkUpsert(ctx context.Context, table string, data BulkUpsertData, opts ...Option) error
 
+	// ReadRows reads a batch of rows non-transactionally.
 	ReadRows(ctx context.Context, path string, keys value.Value, opts ...options.ReadRowsOption) (_ result.Result, err error)
 }
 
