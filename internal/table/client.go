@@ -390,7 +390,7 @@ func (c *Client) ReadRows(
 	keys value.Value,
 	opts ...options.ReadRowsOption,
 ) (_ result.Result, err error) {
-	return readRows(ctx, Ydb_Table_V1.NewTableServiceClient(c.cc), "", false, path, keys, opts...)
+	return readRows(ctx, Ydb_Table_V1.NewTableServiceClient(c.cc), "", c.config.IgnoreTruncated(), path, keys, opts...)
 }
 
 func executeTxOperation(ctx context.Context, c *Client, op table.TxOperation, tx table.Transaction) (err error) {
