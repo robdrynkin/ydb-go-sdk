@@ -17,7 +17,7 @@ import (
 	"github.com/ydb-platform/ydb-go-sdk/v3/table/types"
 )
 
-func TestKeyValueWithSession(t *testing.T) {
+func TestKeyValue(t *testing.T) {
 	if version.Lt(os.Getenv("YDB_VERSION"), "23.3") {
 		t.Skip("read rows not allowed in YDB version '" + os.Getenv("YDB_VERSION") + "'")
 	}
